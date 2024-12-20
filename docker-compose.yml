@@ -7,6 +7,8 @@ services:
     depends_on:
       my-db:
         condition: service_healthy
+      my-cache-server:
+        condition: service_healthy
   my-db:
     image: mysql
     environment:
@@ -20,3 +22,11 @@ services:
       test: [ "CMD", "mysqladmin", "ping" ] # MySQL이 healthy 한 지 판단할 수 있는 명령어
       interval: 5s # 5초 간격으로 체크
       retries: 10 # 10번까지 재시도
+  my-cache-server:
+    image: redis
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 10
