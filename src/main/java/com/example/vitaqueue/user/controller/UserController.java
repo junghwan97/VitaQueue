@@ -2,7 +2,7 @@ package com.example.vitaqueue.user.controller;
 
 import com.example.vitaqueue.user.dto.request.MailRequest;
 import com.example.vitaqueue.user.dto.request.UserJoinRequest;
-import com.example.vitaqueue.user.dto.response.ApiResponse;
+import com.example.vitaqueue.common.ApiResponse;
 import com.example.vitaqueue.user.dto.response.UserJoinResponse;
 import com.example.vitaqueue.user.service.MailService;
 import com.example.vitaqueue.user.service.UserService;

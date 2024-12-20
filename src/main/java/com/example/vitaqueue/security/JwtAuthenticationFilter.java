@@ -4,7 +4,7 @@ import com.example.vitaqueue.common.exception.ErrorCode;
 import com.example.vitaqueue.common.exception.VitaQueueException;
 import com.example.vitaqueue.jwt.JwtUtil;
 import com.example.vitaqueue.user.dto.request.UserLoginRequest;
-import com.example.vitaqueue.user.dto.response.ApiResponse;
+import com.example.vitaqueue.common.ApiResponse;
 import com.example.vitaqueue.user.model.enums.UserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;

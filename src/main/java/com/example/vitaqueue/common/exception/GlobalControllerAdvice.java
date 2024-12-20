@@ -1,6 +1,6 @@
 package com.example.vitaqueue.common.exception;
 
-import com.example.vitaqueue.user.dto.response.ApiResponse;
+import com.example.vitaqueue.common.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
