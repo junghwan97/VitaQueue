@@ -1,4 +1,4 @@
-package com.example.vitaqueue.user.dto.response;
+package com.example.vitaqueue.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
