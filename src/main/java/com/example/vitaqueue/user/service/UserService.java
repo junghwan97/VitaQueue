@@ -4,6 +4,7 @@ import com.example.vitaqueue.common.exception.ErrorCode;
 import com.example.vitaqueue.common.exception.VitaQueueException;
 import com.example.vitaqueue.jwt.JwtUtil;
 import com.example.vitaqueue.user.dto.request.UserJoinRequest;
+import com.example.vitaqueue.user.dto.response.UserInfoResponse;
 import com.example.vitaqueue.user.dto.response.UserJoinResponse;
 import com.example.vitaqueue.user.model.entity.UserEntity;
 import com.example.vitaqueue.user.repository.UserRepository;
@@ -31,5 +32,13 @@ public class UserService {
         // 없다면 회원가입 로직 진행
         UserEntity userEntity = userRepository.save(UserEntity.of(requestDto, encodePassword));
         return UserJoinResponse.fromUserEntity(userEntity);
+    }
+
+
+    public UserInfoResponse getUserInfo(String email) throws Exception{
+        // 유저가 있는지 확인 / 없으면 예외 처리
+        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
+                () -> new VitaQueueException(ErrorCode.USER_NOT_FOUND, "등록되지 않은 메일입니다."));
+        return UserInfoResponse.fromEntity(UserEntity.decryptSensitiveData(userEntity));
     }
 }

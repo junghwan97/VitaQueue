@@ -74,5 +74,12 @@ public class UserEntity {
         userEntity.setRole(UserRole.USER);
         return userEntity;
     }
-
+    public static UserEntity decryptSensitiveData(UserEntity user) throws Exception {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail(EncryptionUtil.decrypt(user.email));
+        userEntity.setName(EncryptionUtil.decrypt(user.name));
+        userEntity.setAddress(EncryptionUtil.decrypt(user.address));
+        userEntity.setPhone(EncryptionUtil.decrypt(user.phone));
+        return userEntity;
+    }
 }

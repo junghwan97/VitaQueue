@@ -3,15 +3,14 @@ package com.example.vitaqueue.user.controller;
 import com.example.vitaqueue.user.dto.request.MailRequest;
 import com.example.vitaqueue.user.dto.request.UserJoinRequest;
 import com.example.vitaqueue.common.ApiResponse;
+import com.example.vitaqueue.user.dto.response.UserInfoResponse;
 import com.example.vitaqueue.user.dto.response.UserJoinResponse;
 import com.example.vitaqueue.user.service.MailService;
 import com.example.vitaqueue.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,4 +39,8 @@ public class UserController {
         return ApiResponse.success(userJoinResponse);
     }
 
+    @GetMapping("/userInfo")
+    public ApiResponse<UserInfoResponse> myPage(Authentication authentication) throws Exception{
+        return ApiResponse.success(userService.getUserInfo(authentication.getName()));
+    }
 }
