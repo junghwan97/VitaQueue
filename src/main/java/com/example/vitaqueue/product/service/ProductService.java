@@ -45,7 +45,8 @@ public class ProductService{
         // 상품 아이디로 상품 조회 / 존재하지 않으면 예외처리
         ProductEntity productEntity = productRepository.findById(productId).orElseThrow(
                 () -> new VitaQueueException(ErrorCode.PRODUCT_NOT_FOUND, String.format("%d번 상품은 존재하지 않습니다.", productId)));
-        return ProductResponse.fromEntity(productEntity);
+        ProductStockEntity stock = productStockRepository.findByProductId(productId);
+        return ProductResponse.fromEntity(productEntity, stock.getStock());
     }
 
     public void setProduct(ProductRequest request, Authentication authentication) {
