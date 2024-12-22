@@ -1,8 +1,10 @@
 package com.example.vitaqueue.user.controller;
 
+import com.example.vitaqueue.common.ApiResponse;
 import com.example.vitaqueue.user.dto.request.MailRequest;
 import com.example.vitaqueue.user.dto.request.UserJoinRequest;
-import com.example.vitaqueue.common.ApiResponse;
+import com.example.vitaqueue.user.dto.request.UserUpdatePwRequest;
+import com.example.vitaqueue.user.dto.request.UserUpdateRequest;
 import com.example.vitaqueue.user.dto.response.UserInfoResponse;
 import com.example.vitaqueue.user.dto.response.UserJoinResponse;
 import com.example.vitaqueue.user.service.MailService;
@@ -39,8 +41,23 @@ public class UserController {
         return ApiResponse.success(userJoinResponse);
     }
 
+    // 사용자 상세 정보 조회
     @GetMapping("/userInfo")
-    public ApiResponse<UserInfoResponse> myPage(Authentication authentication) throws Exception{
+    public ApiResponse<UserInfoResponse> userInfo(Authentication authentication) throws Exception {
         return ApiResponse.success(userService.getUserInfo(authentication.getName()));
+    }
+
+    // 사용자 상세 정보 수정
+    @PatchMapping("/userInfo")
+    public ApiResponse<Void> updateUserInfo(@Valid @RequestBody UserUpdateRequest request, Authentication authentication) throws Exception {
+        userService.updateUserInfo(request, authentication.getName());
+        return ApiResponse.success();
+    }
+
+    // 비밀번호 수정
+    @PatchMapping("/pw")
+    public ApiResponse<Void> updatePassword(@Valid @RequestBody UserUpdatePwRequest request, Authentication authentication) {
+        userService.updatePassword(request, authentication.getName());
+        return ApiResponse.success();
     }
 }
