@@ -20,8 +20,9 @@ public class ProductController {
 
     // 등록되어 있는 상품의 리스트 조회
     @GetMapping
-    public ApiResponse<List<ProductResponse>> getProducts() {
-        return ApiResponse.success(productService.getProducts());
+    public ApiResponse<List<ProductResponse>> getProducts(@RequestParam(value = "cursorId", defaultValue = "0") Long cursorId,
+                                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        return ApiResponse.success(productService.getProducts(cursorId, size));
     }
 
     // 특정 상품 조회

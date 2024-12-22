@@ -22,8 +22,13 @@ public class ProductService{
     private final ProductRepository productRepository;
     private final ProductStockRepository productStockRepository;
 
-    public List<ProductResponse> getProducts() {
-        List<ProductEntity> productEntityList = productRepository.findAll();
+    public List<ProductResponse> getProducts(Long cursorId, Integer size) {
+        List<ProductEntity> productEntityList;
+        // 커서가 0이라면 최신 등록 제품를 size만큼 반환
+        if (cursorId == 0) productEntityList = productRepository.findAllOrderByIdDesc(size);
+        // 커서가 0이 아니라면 cursor번 등록 제품부터 size만큼 반환
+        else productEntityList = productRepository.findAllOrderByIdDescWithCursor(cursorId, size);
+
         return productEntityList.stream().map(ProductResponse::fromEntity).toList();
     }
 
