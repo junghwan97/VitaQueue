@@ -21,13 +21,13 @@ public class ProductController {
     // 등록되어 있는 상품의 리스트 조회
     @GetMapping
     public ApiResponse<List<ProductResponse>> getProducts(@RequestParam(value = "cursorId", defaultValue = "0") Long cursorId,
-                                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                                          @RequestParam(value = "size", defaultValue = "10") Integer size) throws Exception{
         return ApiResponse.success(productService.getProducts(cursorId, size));
     }
 
     // 특정 상품 조회
     @GetMapping("/{productId}")
-    public ApiResponse<ProductResponse> getProduct(@PathVariable Long productId) {
+    public ApiResponse<ProductResponse> getProduct(@PathVariable Long productId) throws Exception {
         return ApiResponse.success(productService.getProduct(productId));
     }
 
@@ -35,7 +35,7 @@ public class ProductController {
     @PostMapping
     public ApiResponse<Void> setProduct(@Valid @RequestBody ProductRequest request, Authentication authentication) {
         // 관리자 권한만 등록 가능
-        productService.setProduct(request, authentication.getAuthorities());
+        productService.setProduct(request, authentication);
         return ApiResponse.success();
     }
 }
