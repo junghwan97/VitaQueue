@@ -89,13 +89,13 @@ public class ProductService {
     }
 
     // 유저 확인
-    private UserEntity getUserEntity(String email) {
+    public UserEntity getUserEntity(String email) {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> new VitaQueueException(ErrorCode.USER_NOT_FOUND, "등록되지 않은 메일입니다."));
     }
 
     //상품 확인
-    private ProductEntity getProductEntity(Long productId) {
+    public ProductEntity getProductEntity(Long productId) {
         return productRepository.findById(productId).orElseThrow(
                 () -> new VitaQueueException(ErrorCode.PRODUCT_NOT_FOUND, String.format("%d번 상품은 존재하지 않습니다.", productId)));
     }
