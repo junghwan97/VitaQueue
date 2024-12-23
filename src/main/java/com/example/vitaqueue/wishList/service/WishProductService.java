@@ -8,6 +8,7 @@ import com.example.vitaqueue.user.model.entity.UserEntity;
 import com.example.vitaqueue.user.service.UserService;
 import com.example.vitaqueue.wishList.dto.request.WishProductRequest;
 import com.example.vitaqueue.wishList.dto.request.WishProductUpdateRequest;
+import com.example.vitaqueue.wishList.dto.response.WishProductResponse;
 import com.example.vitaqueue.wishList.model.entity.WishProduct;
 import com.example.vitaqueue.wishList.repository.WishProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -75,5 +77,11 @@ public class WishProductService {
                 () -> new VitaQueueException(ErrorCode.WISH_PRODUCT_NOT_FOUND, "장바구니에서 해당 상품을 찾지 못하였습니다.")
         );
         wishProductRepository.delete(existingWishProduct);
+    }
+
+    public List<WishProductResponse> getWishProducts(Authentication authentication) {
+        String email = authentication.getName();
+        UserEntity userEntity = userService.getUserEntity(email);
+        return wishProductRepository.findAllByUserId(userEntity.getId()).stream().map(WishProductResponse::fromEntity).toList();
     }
 }
