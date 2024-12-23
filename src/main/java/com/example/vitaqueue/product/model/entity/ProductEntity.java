@@ -3,9 +3,7 @@ package com.example.vitaqueue.product.model.entity;
 import com.example.vitaqueue.product.dto.request.ProductRequest;
 import com.example.vitaqueue.user.model.entity.UserEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -16,6 +14,8 @@ import java.time.Instant;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "product")
 @SQLDelete(sql = "UPDATE product SET deleted_at = NOW() where id=?")
@@ -45,12 +45,20 @@ public class ProductEntity {
     @Column(name = "registered_at")
     private Timestamp registeredAt;
 
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
+
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
 
     @PrePersist
     void registeredAT() {
         this.registeredAt = Timestamp.from(Instant.now());
+    }
+
+    @PreUpdate
+    void updatedAt() {
+        this.updatedAt = Timestamp.from(Instant.now());
     }
 
     public ProductEntity of(ProductRequest request, UserEntity userEntity) {
