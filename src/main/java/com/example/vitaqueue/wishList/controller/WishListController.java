@@ -29,8 +29,8 @@ public class WishListController {
     }
 
     @DeleteMapping("{wishProductId}")
-    public ApiResponse<Void> deleteWishProduct(@PathVariable Long wishProductId) {
-        wishProductService.deleteWishProduct(wishProductId);
+    public ApiResponse<Void> deleteWishProduct(@PathVariable Long wishProductId, Authentication authentication) {
+        wishProductService.deleteWishProduct(wishProductId, authentication);
         return ApiResponse.success();
     }
 }
