@@ -12,7 +12,8 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED, "Invalid Password"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product doesn't exist"),
-    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid")
+    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED, "Permission is invalid"),
+    WISH_PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "WishProduct is doesn't exist")
     ;
 
     private HttpStatus status;

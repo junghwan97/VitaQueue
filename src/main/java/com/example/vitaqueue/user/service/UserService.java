@@ -60,7 +60,7 @@ public class UserService {
     }
 
     // 유저 확인
-    private UserEntity getUserEntity(String email) {
+    public UserEntity getUserEntity(String email) {
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
                 () -> new VitaQueueException(ErrorCode.USER_NOT_FOUND, "등록되지 않은 메일입니다."));
         return userEntity;
