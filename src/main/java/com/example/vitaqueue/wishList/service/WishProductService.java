@@ -67,7 +67,13 @@ public class WishProductService {
         existingWishProduct.setProductPrice(price.multiply(BigDecimal.valueOf(request.getQuantity())));
     }
 
-    public void deleteWishProduct(Long wishProductId) {
-        wishProductRepository.deleteById(wishProductId);
+    public void deleteWishProduct(Long wishProductId, Authentication authentication) {
+        // 장바구니 주인 확인
+        UserEntity userEntity = userService.getUserEntity(authentication.getName());
+        // 장바구니에서 해당 상품이 이미 있는지 확인
+        WishProduct existingWishProduct = wishProductRepository.findByIdAndUserId(wishProductId, userEntity.getId()).orElseThrow(
+                () -> new VitaQueueException(ErrorCode.WISH_PRODUCT_NOT_FOUND, "장바구니에서 해당 상품을 찾지 못하였습니다.")
+        );
+        wishProductRepository.delete(existingWishProduct);
     }
 }
