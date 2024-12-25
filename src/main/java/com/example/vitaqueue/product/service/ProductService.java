@@ -46,10 +46,9 @@ public class ProductService {
     public ProductResponse getProduct(Long productId) throws Exception {
         // 상품 아이디로 상품 조회 / 존재하지 않으면 예외처리
         ProductEntity productEntity = getProductEntity(productId);
-        ProductStockEntity stock = productStockRepository.findByProductId(productId);
+        ProductStockEntity stock = getProductStockByProductId(productId);
         return ProductResponse.fromEntity(productEntity, stock.getStock());
     }
-
 
     public void setProduct(ProductRequest request, Authentication authentication) {
         // 유저 권한 확인
@@ -60,7 +59,6 @@ public class ProductService {
         // 재고 정보 저장
         productStockRepository.save(new ProductStockEntity().of(productEntity, request.getStock()));
     }
-
 
     @Transactional
     public void updateProduct(Long productId, ProductUpdateRequest request, Authentication authentication) {
@@ -100,4 +98,14 @@ public class ProductService {
                 () -> new VitaQueueException(ErrorCode.PRODUCT_NOT_FOUND, String.format("%d번 상품은 존재하지 않습니다.", productId)));
     }
 
+    // 상품 재고 등록 확인
+    public ProductStockEntity getProductStockByProductId(Long productId) {
+        return productStockRepository.findByProductId(productId).orElseThrow(
+                ()->new VitaQueueException(ErrorCode.PRODUCT_STOCK_NOT_FOUND, "상품 재고 정보를 찾을 수 없습니다."));
+    }
+
+    // 재고 저장
+    public void saveProductStock(ProductStockEntity productStockEntity) {
+        productStockRepository.save(productStockEntity);
+    }
 }
