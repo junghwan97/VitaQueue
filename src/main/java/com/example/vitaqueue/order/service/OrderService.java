@@ -100,12 +100,12 @@ public class OrderService {
 
         // 주문에 대한 권한을 확인
         if (!order.getUserId().equals(userEntity.getId())) {
-            throw new SecurityException("해당 주문에 대한 권한이 없습니다.");
+            throw new VitaQueueException(ErrorCode.INVALID_PERMISSION, "해당 주문에 대한 권한이 없습니다.");
         }
 
         // 주문 상태를 확인
         if (order.getStatus() != OrderStatus.CREATED) {
-            throw new IllegalStateException("배송 중 이전에만 주문을 취소할 수 있습니다.");
+            throw new VitaQueueException(ErrorCode.ORDER_CANCELLATION_NOT_ALLOWED, "배송 중 이전에만 주문을 취소할 수 있습니다.");
         }
 
         // 주문 상태를 취소 완료로 변경
