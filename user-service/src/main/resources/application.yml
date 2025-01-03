@@ -1,0 +1,45 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://user-db:13306/${USER_MYSQL_DATABASE}
+    username: ${USER_MYSQL_USERNAME}
+    password: ${USER_MYSQL_PASSWORD}
+  data:
+    redis:
+      host: my-cache-server
+      port: 6379
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show_sql: true
+    generate-ddl: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+#      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://127.0.0.1:8761/eureka
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  expiration-time: 86400000 # 24 hours in milliseconds

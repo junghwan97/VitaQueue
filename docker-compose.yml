@@ -1,32 +1,179 @@
-services:
-  my-server:
-    build: .
-    ports:
-      - 8080:8080
+version: '3.8'
 
+services:
+  # 1. Eureka 서버
+  discovery-service:
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    container_name: discovery-service
+    ports:
+      - "8888:8761"
+    networks:
+      - commerce-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # 2. Gateway 서비스
+  apigateway-service:
+    build:
+      context: ./apigateway-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
     depends_on:
-      my-db:
+      discovery-service:
         condition: service_healthy
-      my-cache-server:
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka-server:8761/eureka/
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    restart: on-failure
+    networks:
+      - commerce-network
+
+  # 3. User Service
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      user-db:
         condition: service_healthy
-  my-db:
+      apigateway-service:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://user-db:3306/${USER_MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${USER_MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${USER_MYSQL_PASSWORD}
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    restart: on-failure
+    networks:
+      - commerce-network
+
+  # 4. Product Service
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      product-db:
+        condition: service_healthy
+      apigateway-service:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://product-db:3306/${PRODUCT_MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${PRODUCT_MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${PRODUCT_MYSQL_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    restart: on-failure
+    networks:
+      - commerce-network
+
+  # 5. Order Service
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8083"
+    depends_on:
+      order-db:
+        condition: service_healthy
+      apigateway-service:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://order-db:3306/${ORDER_MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${ORDER_MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${ORDER_MYSQL_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    restart: on-failure
+    networks:
+      - commerce-network
+
+  # 6. Wishlist Service
+  wishlist-service:
+    build:
+      context: ./wishlist-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8084"
+    depends_on:
+      wishlist-db:
+        condition: service_healthy
+      apigateway-service:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://wishlist-db:3306/${WISHLIST_MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${WISHLIST_MYSQL_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${WISHLIST_MYSQL_PASSWORD}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    restart: on-failure
+    networks:
+      - commerce-network
+
+  # 데이터베이스 설정
+  user-db:
     image: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: vitaQueue
-    volumes:
-      - ./mysql_data:/var/lib/mysql
+      MYSQL_DATABASE: ${USER_MYSQL_DATABASE}
+      MYSQL_USER: ${USER_MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${USER_MYSQL_PASSWORD}
     ports:
-      - 3306:3306
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping" ] # MySQL이 healthy 한 지 판단할 수 있는 명령어
-      interval: 5s # 5초 간격으로 체크
-      retries: 10 # 10번까지 재시도
+      - "13306:3306"
+    networks:
+      - commerce-network
+
+  product-db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: ${PRODUCT_MYSQL_DATABASE}
+      MYSQL_USER: ${PRODUCT_MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${PRODUCT_MYSQL_PASSWORD}
+    ports:
+      - "13307:3306"
+    networks:
+      - commerce-network
+
+  order-db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: ${ORDER_MYSQL_DATABASE}
+      MYSQL_USER: ${ORDER_MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${ORDER_MYSQL_PASSWORD}
+    ports:
+      - "13308:3306"
+    networks:
+      - commerce-network
+
+  wishlist-db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: ${WISHLIST_MYSQL_DATABASE}
+      MYSQL_USER: ${WISHLIST_MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${WISHLIST_MYSQL_PASSWORD}
+    ports:
+      - "13309:3306"
+    networks:
+      - commerce-network
+
+  # 캐시 서버
   my-cache-server:
     image: redis
     ports:
-      - 6379:6379
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 5s
-      retries: 10
+      - "6379:6379"
+    networks:
+      - commerce-network
+
+networks:
+  commerce-network:
+    driver: bridge

@@ -1,0 +1,26 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: product-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://product-db:13307/${PRODUCT_MYSQL_DATABASE}
+    username: ${PRODUCT_MYSQL_USERNAME}
+    password: ${PRODUCT_MYSQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show_sql: true
+    generate-ddl: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+#      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://127.0.0.1:8761/eureka
