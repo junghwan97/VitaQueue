@@ -1,0 +1,25 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: wishlist-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://wishlist-db:13309/${WISHLIST_MYSQL_DATABASE}
+    username: ${WISHLIST_MYSQL_USERNAME}
+    password: ${WISHLIST_MYSQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show_sql: true
+    generate-ddl: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+#      defaultZone: http://eureka-server:8761/eureka
+      defaultZone: http://127.0.0.1:8761/eureka
