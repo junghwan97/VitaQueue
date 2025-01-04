@@ -8,9 +8,11 @@ services:
       dockerfile: Dockerfile
     container_name: discovery-service
     ports:
-      - "8888:8761"
+      - "8761:8761"
     networks:
       - commerce-network
+    environment:  # 111111111111111
+      - EUREKA_INSTANCE_HOSTNAME=discovery-service  # 서비스 URL을 localhost로 표시 111111111111111
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 10s
@@ -29,11 +31,18 @@ services:
       discovery-service:
         condition: service_healthy
     environment:
-      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://eureka-server:8761/eureka/
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://discovery-service:8761/eureka/
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      EUREKA_INSTANCE_HOSTNAME: apigateway-service  # 111111111111111
     restart: on-failure
     networks:
       - commerce-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # 3. User Service
   user-service:
@@ -54,6 +63,7 @@ services:
       EMAIL_USERNAME: ${EMAIL_USERNAME}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      EUREKA_INSTANCE_HOSTNAME: user-service  # 111111111111111
     restart: on-failure
     networks:
       - commerce-network
@@ -75,6 +85,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${PRODUCT_MYSQL_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${PRODUCT_MYSQL_PASSWORD}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      EUREKA_INSTANCE_HOSTNAME: product-service  # 111111111111111
     restart: on-failure
     networks:
       - commerce-network
@@ -96,6 +107,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${ORDER_MYSQL_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${ORDER_MYSQL_PASSWORD}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      EUREKA_INSTANCE_HOSTNAME: order-service  # 111111111111111
     restart: on-failure
     networks:
       - commerce-network
@@ -117,6 +129,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${WISHLIST_MYSQL_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${WISHLIST_MYSQL_PASSWORD}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      EUREKA_INSTANCE_HOSTNAME: wishlist-service  # 111111111111111
     restart: on-failure
     networks:
       - commerce-network
@@ -130,8 +143,16 @@ services:
       MYSQL_PASSWORD: ${USER_MYSQL_PASSWORD}
     ports:
       - "13306:3306"
+    volumes:
+      - ./data/user_data:/var/lib/mysql
     networks:
       - commerce-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u${USER_MYSQL_USERNAME}", "-p${USER_MYSQL_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   product-db:
     image: mysql
@@ -141,8 +162,16 @@ services:
       MYSQL_PASSWORD: ${PRODUCT_MYSQL_PASSWORD}
     ports:
       - "13307:3306"
+    volumes:
+      - ./data/product_data:/var/lib/mysql
     networks:
       - commerce-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u${PRODUCT_MYSQL_USERNAME}", "-p${PRODUCT_MYSQL_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   order-db:
     image: mysql
@@ -152,8 +181,16 @@ services:
       MYSQL_PASSWORD: ${ORDER_MYSQL_PASSWORD}
     ports:
       - "13308:3306"
+    volumes:
+      - ./data/order_data:/var/lib/mysql
     networks:
       - commerce-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u${ORDER_MYSQL_USERNAME}", "-p${ORDER_MYSQL_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   wishlist-db:
     image: mysql
@@ -163,8 +200,16 @@ services:
       MYSQL_PASSWORD: ${WISHLIST_MYSQL_PASSWORD}
     ports:
       - "13309:3306"
+    volumes:
+      - ./data/wishlist_data:/var/lib/mysql
     networks:
       - commerce-network
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u${WISHLIST_MYSQL_USERNAME}", "-p${WISHLIST_MYSQL_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # 캐시 서버
   my-cache-server:
@@ -176,4 +221,5 @@ services:
 
 networks:
   commerce-network:
-    driver: bridge
+    external: true
+    name: vitaqueue_commerce-network

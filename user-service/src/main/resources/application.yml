@@ -38,8 +38,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-#      defaultZone: http://eureka-server:8761/eureka
-      defaultZone: http://127.0.0.1:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   expiration-time: 86400000 # 24 hours in milliseconds
