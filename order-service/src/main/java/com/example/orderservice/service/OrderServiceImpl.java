@@ -1,7 +1,6 @@
 package com.example.orderservice.service;
 
 import com.example.orderservice.client.ProductServiceClient;
-import com.example.orderservice.client.UserServiceClient;
 import com.example.orderservice.dto.request.OrderRequest;
 import com.example.orderservice.dto.request.StockRequest;
 import com.example.orderservice.dto.response.OrderProductResponse;
@@ -24,74 +23,85 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final UserServiceClient userService;
+    private final StockService stockService;
     private final ProductServiceClient productService;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             OrderProductRepository orderProductRepository,
-                            UserServiceClient userService,
+                            StockService stockService,
                             ProductServiceClient productService) {
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
-        this.userService = userService;
+        this.stockService = stockService;
         this.productService = productService;
     }
 
     @Override
     @Transactional
     public Long saveOrder(List<OrderRequest> orderSaveRequestList, Long userId) {
-        // 사용자 정보 조회
-        String address = orderSaveRequestList.get(0).getAddress();
-        String phone = orderSaveRequestList.get(0).getPhone();
+        validateOrderRequest(orderSaveRequestList);
 
-        // 주문 엔티티 생성 및 저장
+        String address = extractAddress(orderSaveRequestList);
+        String phone = extractPhone(orderSaveRequestList);
+
         OrderEntity savedOrder = createOrder(userId, address, phone);
 
-        // 주문 상품 정보 생성 및 저장
         List<OrderProductEntity> orderProductList = createOrderProducts(userId, orderSaveRequestList, savedOrder);
         orderProductRepository.saveAll(orderProductList);
 
-        // 주문의 총 가격 계산 후 저장
-        BigDecimal totalPrice = calculateTotalPrice(orderProductList);
-        savedOrder.updateTotalPrice(totalPrice);
+        updateTotalPrice(savedOrder, orderProductList);
 
-        // 생성된 주문 ID 반환
         return savedOrder.getId();
     }
 
+    private void validateOrderRequest(List<OrderRequest> orderRequests) {
+        if (orderRequests == null || orderRequests.isEmpty()) {
+            throw new IllegalArgumentException("주문 요청이 비어 있습니다.");
+        }
+    }
+
+    private String extractAddress(List<OrderRequest> orderRequests) {
+        return orderRequests.get(0).getAddress();
+    }
+
+    private String extractPhone(List<OrderRequest> orderRequests) {
+        return orderRequests.get(0).getPhone();
+    }
+
     private OrderEntity createOrder(Long userId, String address, String phone) {
-        // 용자 ID와 배송 정보를 사용해 OrderEntity를 생성하고 저장
-        return orderRepository.save(OrderEntity.builder().userId(userId).deliveryAddress(address).receiverPhone(phone).build());
+        return orderRepository.save(OrderEntity.builder()
+                .userId(userId)
+                .deliveryAddress(address)
+                .receiverPhone(phone)
+                .build());
     }
 
-    private List<OrderProductEntity> createOrderProducts(Long userId, List<OrderRequest> orderSaveRequestList, OrderEntity savedOrder) {
-        return orderSaveRequestList.stream()
-                .map(orderRequest -> {
-                    // 상품 ID로 재고 정보를 조회
-                    ProductStockResponse productStock = productService.checkCount(orderRequest.getProductId());
-                    // 상품 재고를 감소
-                    productStock.decreaseStock((long) orderRequest.getQuantity());
-                    StockRequest stock = new StockRequest(productStock.getProductId(), productStock.getStock());
-                    productService.saveProductStock(stock);
-                    BigDecimal price = productService.getProduct(productStock.getProductId()).getPrice();
-                    // 주문 상품 엔티티를 생성
-                    return OrderProductEntity.builder()
-                            .order(savedOrder)
-                            .userId(userId)
-                            .productId(orderRequest.getProductId())
-                            .quantity(orderRequest.getQuantity())
-                            .price(price.multiply(BigDecimal.valueOf(orderRequest.getQuantity())))
-                            .status(OrderStatus.CREATED)
-                            .build();
-                }).toList();
+    private List<OrderProductEntity> createOrderProducts(Long userId, List<OrderRequest> orderRequests, OrderEntity savedOrder) {
+        return orderRequests.stream()
+                .map(orderRequest -> createOrderProduct(userId, savedOrder, orderRequest))
+                .toList();
     }
 
-    private BigDecimal calculateTotalPrice(List<OrderProductEntity> orderProducts) {
-        return orderProducts.stream()
-                .map(OrderProductEntity::getPrice) // 각 상품의 가격 조회
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // 총합 계산
+    private OrderProductEntity createOrderProduct(Long userId, OrderEntity savedOrder, OrderRequest orderRequest) {
+        stockService.decreaseStock(orderRequest.getProductId(), orderRequest.getQuantity());
+        BigDecimal price = stockService.fetchProductPrice(orderRequest.getProductId());
+
+        return OrderProductEntity.builder()
+                .order(savedOrder)
+                .userId(userId)
+                .productId(orderRequest.getProductId())
+                .quantity(orderRequest.getQuantity())
+                .price(price.multiply(BigDecimal.valueOf(orderRequest.getQuantity())))
+                .status(OrderStatus.CREATED)
+                .build();
     }
 
+    private void updateTotalPrice(OrderEntity order, List<OrderProductEntity> orderProducts) {
+        BigDecimal totalPrice = orderProducts.stream()
+                .map(OrderProductEntity::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        order.updateTotalPrice(totalPrice);
+    }
 
     @Override
     @Transactional
@@ -200,11 +210,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderProductResponse> getOrdersByUserId(Long userId) {
         // 주문 정보 조회
         List<OrderEntity> orders = orderRepository.findByUserId(userId);
-
-        if (orders == null || orders.isEmpty()) {
-//            throw new VitaQueueException(ErrorCode.ORDER_NOT_FOUND);
-            return null;
-        }
+        if (orders == null) return null;
 
         // 상세 주문 정보 리스트 초기화
         List<OrderProductResponse> orderProductResponseList = new ArrayList<>();
@@ -215,16 +221,13 @@ public class OrderServiceImpl implements OrderService {
 
             for (OrderProductEntity product : products) {
                 ProductResponse productResponse = productService.getProduct(product.getProductId());
-                // `OrderProductResponse` 객체로 변환
                 OrderProductResponse response = OrderProductResponse.fromEntity(
                         product,
                         productResponse.getName()
-                         // 필요한 추가 데이터 매핑
                 );
                 orderProductResponseList.add(response); // 변환된 객체를 리스트에 추가
             }
         }
-
         return orderProductResponseList;
     }
 }
