@@ -16,6 +16,6 @@ public interface ProductServiceClient {
     @PostMapping("/saveStockCount")
     void saveProductStock(@RequestBody StockRequest stockRequest);
 
-    @GetMapping("/{productId}")
+    @GetMapping("/products/{productId}")
     ProductResponse getProduct(@PathVariable Long productId);
 }
