@@ -6,11 +6,21 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-#      defaultZone: http://eureka-server:8761/eureka
-      defaultZone: http://127.0.0.1:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   expiration-time: 86400000 # 24 hours in milliseconds
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # 모든 Actuator 엔드포인트를 노출
+  endpoint:
+    health:
+      enabled: true # /actuator/health 활성화
+      show-details: always # 헬스 세부 정보 표시
 
 spring:
   application:
@@ -21,7 +31,15 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/login
+            - Path=/user-service/sendCode
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/checkCode
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -37,7 +55,7 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/**
+            - Path=/user-service/login
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
@@ -46,7 +64,7 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/**
-            - Method=GET, PATCH, POST
+            - Method=GET, POST, PATCH
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
@@ -55,7 +73,7 @@ spring:
           uri: lb://PRODUCT-SERVICE
           predicates:
             - Path=/product-service/**
-            - Method=GET, PATCH, POST, DELETE
+            - Method=GET, POST, PATCH, DELETE
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/product-service/(?<segment>.*), /$\{segment}
@@ -64,16 +82,16 @@ spring:
           uri: lb://ORDER-SERVICE
           predicates:
             - Path=/order-service/**
-            - Method=GET, PATCH, POST, DELETE
+            - Method=GET, POST, PATCH, DELETE
           filters:
             - RemoveRequestHeader=Cookie
-            - RewritePath=/product-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/order-service/(?<segment>.*), /$\{segment}
             - AuthorizationHeaderFilter
         - id: wishlist-service
           uri: lb://WISHLIST-SERVICE
           predicates:
             - Path=/wishlist-service/**
-            - Method=GET, PATCH, POST, DELETE
+            - Method=GET, POST, PATCH, DELETE
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/wishlist-service/(?<segment>.*), /$\{segment}
