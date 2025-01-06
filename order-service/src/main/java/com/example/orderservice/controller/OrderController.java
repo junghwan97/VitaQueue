@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/order-service")
+@RequestMapping("/")
 public class OrderController {
     OrderService orderService;
 
@@ -47,7 +47,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders")
-    public ApiResponse<List<OrderProductResponse>> getOrders(@RequestParam Long userId ){
+    public ApiResponse<List<OrderProductResponse>> getOrders(@RequestHeader("X-User-Id") Long userId){
         List<OrderProductResponse> orderList = orderService.getOrdersByUserId(Long.valueOf(userId));
         return ApiResponse.success(orderList);
     }

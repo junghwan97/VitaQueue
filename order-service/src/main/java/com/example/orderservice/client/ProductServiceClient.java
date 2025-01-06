@@ -1,6 +1,7 @@
 package com.example.orderservice.client;
 
 import com.example.orderservice.dto.request.StockRequest;
+import com.example.orderservice.dto.response.ApiResponse;
 import com.example.orderservice.dto.response.ProductResponse;
 import com.example.orderservice.dto.response.ProductStockResponse;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -17,5 +18,5 @@ public interface ProductServiceClient {
     void saveProductStock(@RequestBody StockRequest stockRequest);
 
     @GetMapping("/products/{productId}")
-    ProductResponse getProduct(@PathVariable Long productId);
+    ApiResponse<ProductResponse> getProduct(@PathVariable Long productId);
 }

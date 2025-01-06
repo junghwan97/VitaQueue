@@ -200,7 +200,7 @@ public class OrderServiceImpl implements OrderService {
         // 주문 상품 목록을 Response값으로 변환
         List<OrderProductResponse> orderProductResponseList = new ArrayList<>();
         for (OrderProductEntity orderProductEntity : orderProductEntities) {
-            ProductResponse productResponse = productService.getProduct(orderProductEntity.getProductId());
+            ProductResponse productResponse = productService.getProduct(orderProductEntity.getProductId()).getResult();
             orderProductResponseList.add(OrderProductResponse.fromEntity(orderProductEntity, productResponse.getName()));
         }
         return orderProductResponseList;
@@ -220,7 +220,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderProductEntity> products = orderProductRepository.findByOrderId(orderEntity.getId());
 
             for (OrderProductEntity product : products) {
-                ProductResponse productResponse = productService.getProduct(product.getProductId());
+                ProductResponse productResponse = productService.getProduct(product.getProductId()).getResult();
                 OrderProductResponse response = OrderProductResponse.fromEntity(
                         product,
                         productResponse.getName()
