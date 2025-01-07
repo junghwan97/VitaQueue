@@ -41,6 +41,9 @@ public class ProductEntity {
     @Column(name = "category", nullable = false)
     private String category;
 
+    @Column(name = "is_flash_sale", nullable = false)
+    private boolean isFlashSale;
+
     @Column(name = "registered_at")
     private Timestamp registeredAt;
 

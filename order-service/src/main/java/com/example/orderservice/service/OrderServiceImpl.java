@@ -83,8 +83,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderProductEntity createOrderProduct(Long userId, OrderEntity savedOrder, OrderRequest orderRequest) {
-        stockService.decreaseStock(orderRequest.getProductId(), orderRequest.getQuantity());
-        BigDecimal price = stockService.fetchProductPrice(orderRequest.getProductId());
+//        stockService.decreaseStock(orderRequest.getProductId(), orderRequest.getQuantity());
+        if (stockService.getProduct(orderRequest.getProductId()).getStock() < orderRequest.getQuantity()) {
+            throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH);
+        }
+        BigDecimal price = stockService.getProduct(orderRequest.getProductId()).getPrice();
 
         return OrderProductEntity.builder()
                 .order(savedOrder)
@@ -107,8 +110,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void cancelOrder(Long orderId, Long userId) {
         // 주문 ID로 주문 정보를 조회
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new VitaQueueException(ErrorCode.ORDER_NOT_FOUND, "해당 주문이 존재하지 않습니다."));
+        OrderEntity order = getOrder(orderId);
 
         // 주문에 대한 권한을 확인
         if (!order.getUserId().equals(userId)) {
@@ -142,8 +144,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void returnOrder(Long orderId, Long userId) {
         // 주문 ID로 주문 정보 조회
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new VitaQueueException(ErrorCode.ORDER_NOT_FOUND, "해당 주문이 존재하지 않습니다."));
+        OrderEntity order = getOrder(orderId);
 
         // 주문에 대한 권한 확인
         if (!order.getUserId().equals(userId)) {
@@ -188,8 +189,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderProductResponse> getOrder(Long orderId, Long userId) {
         // 주문 ID로 주문 정보 조회
-        OrderEntity order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new VitaQueueException(ErrorCode.ORDER_NOT_FOUND, "해당 주문이 존재하지 않습니다."));
+        OrderEntity order = getOrder(orderId);
         // 주문에 대한 권한 확인
         if (!order.getUserId().equals(userId)) {
             throw new VitaQueueException(ErrorCode.INVALID_PERMISSION, "해당 주문에 대한 권한이 없습니다.");
@@ -205,6 +205,7 @@ public class OrderServiceImpl implements OrderService {
         }
         return orderProductResponseList;
     }
+
 
     @Override
     public List<OrderProductResponse> getOrdersByUserId(Long userId) {
@@ -229,5 +230,33 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return orderProductResponseList;
+    }
+
+    @Override
+    @Transactional
+    public void enterPayment(Long orderId) {
+        OrderEntity order = getOrder(orderId);
+
+        if (order.getStatus() != OrderStatus.CREATED) {
+            throw new VitaQueueException(ErrorCode.INVALID_ORDER_FOR_PAYMENT, "결제를 위한 주문 상태가 아닙니다.");
+        }
+
+        // 주문 상품 리스트 조회
+        List<OrderProductEntity> orderProducts = orderProductRepository.findByOrder(order);
+
+        // 모든 상품의 주문 상태 변경
+        for (OrderProductEntity orderProduct : orderProducts) {
+            orderProduct.updateStatus(OrderStatus.PAYMENT_ENTERED);
+        }
+        order.updateStatus(OrderStatus.PAYMENT_ENTERED);
+
+        orderRepository.save(order);
+    }
+
+    // 주문 조회
+    private OrderEntity getOrder(Long orderId) {
+        OrderEntity order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) throw new VitaQueueException(ErrorCode.ORDER_NOT_FOUND, "해당 주문이 존재하지 않습니다.");
+        return order;
     }
 }
