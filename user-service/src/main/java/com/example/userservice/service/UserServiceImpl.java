@@ -15,7 +15,6 @@ import com.example.userservice.util.EncryptionUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -77,8 +76,8 @@ public class UserServiceImpl implements UserService {
         // 회원 정보와 주문 목록 반환
         UserEntity userEntity = getUserEntity(userId);
 
-        ResponseEntity<List<OrderProductResponse>> orders = orderServiceClient.getOrders(userId);
-        List<OrderProductResponse> orderList = (orders != null && orders.getBody() != null) ? orders.getBody() : Collections.emptyList();
+        List<OrderProductResponse> orders = orderServiceClient.getOrders(userId);
+        List<OrderProductResponse> orderList = (orders != null) ? orders : Collections.emptyList();
 
         return UserInfoResponse.fromEntity(UserEntity.decryptSensitiveData(userEntity), orderList);
     }

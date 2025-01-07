@@ -24,6 +24,6 @@ public class StockService {
     }
 
     public BigDecimal fetchProductPrice(Long productId) {
-        return productService.getProduct(productId).getPrice();
+        return productService.getProduct(productId).getResult().getPrice();
     }
 }
