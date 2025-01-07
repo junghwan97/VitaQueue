@@ -21,7 +21,9 @@ public enum ErrorCode {
     ORDER_CANCELLATION_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "주문 취소가 허용되지 않습니다."), // 주문 취소가 불가능할 때
     STOCK_INCREASE_NEGATIVE(HttpStatus.BAD_REQUEST, "재고 증가 수량은 음수일 수 없습니다."), // 재고 증가 값이 음수일 때
     STOCK_DECREASE_NEGATIVE(HttpStatus.BAD_REQUEST, "재고 감소 수량은 음수일 수 없습니다."), // 재고 감소 값이 음수일 때
-    STOCK_NOT_ENOUGH(HttpStatus.CONFLICT, "재고가 부족합니다."); // 재고가 요청 수량보다 적을 때
+    STOCK_NOT_ENOUGH(HttpStatus.CONFLICT, "재고가 부족합니다."),  // 재고가 요청 수량보다 적을 때
+    INVALID_ORDER_FOR_PAYMENT(HttpStatus.BAD_REQUEST, "결제 진입을 위한 주문이 생성되지 않았습니다"),
+    ;
 
 
     private HttpStatus status;

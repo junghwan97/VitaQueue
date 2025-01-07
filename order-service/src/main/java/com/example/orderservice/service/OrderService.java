@@ -12,4 +12,5 @@ public interface OrderService {
     void returnOrder(Long orderId, Long userId);
     List<OrderProductResponse> getOrder(Long orderId, Long userId);
     List<OrderProductResponse> getOrdersByUserId(Long userId);
+    void enterPayment(Long orderId);
 }

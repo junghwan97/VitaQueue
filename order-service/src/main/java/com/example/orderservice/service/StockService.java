@@ -2,10 +2,9 @@ package com.example.orderservice.service;
 
 import com.example.orderservice.client.ProductServiceClient;
 import com.example.orderservice.dto.request.StockRequest;
+import com.example.orderservice.dto.response.ProductResponse;
 import com.example.orderservice.dto.response.ProductStockResponse;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 
 @Service
 public class StockService {
@@ -23,7 +22,7 @@ public class StockService {
         return productStock;
     }
 
-    public BigDecimal fetchProductPrice(Long productId) {
-        return productService.getProduct(productId).getResult().getPrice();
+    public ProductResponse getProduct(Long productId) {
+        return productService.getProduct(productId).getResult();
     }
 }

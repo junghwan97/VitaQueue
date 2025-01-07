@@ -18,6 +18,7 @@ public class ProductResponse {
     private BigDecimal price;
     private String descript;
     private Long stock;
+    private boolean isFlashSale;
 
     public static ProductResponse fromEntity(ProductEntity product){
         ProductResponse response = new ProductResponse();
@@ -26,6 +27,7 @@ public class ProductResponse {
         response.sellerId = product.getUserId();
         response.price = product.getPrice();
         response.descript = product.getDescript();
+        response.isFlashSale = product.isFlashSale();
         return response;
     }
 
@@ -36,7 +38,8 @@ public class ProductResponse {
                 product.getUserId(),
                 product.getPrice(),
                 product.getDescript(),
-                stock
+                stock,
+                product.isFlashSale()
         );
     }
 }

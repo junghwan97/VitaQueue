@@ -4,6 +4,7 @@ import com.example.orderservice.dto.request.OrderRequest;
 import com.example.orderservice.dto.response.ApiResponse;
 import com.example.orderservice.dto.response.OrderProductResponse;
 import com.example.orderservice.service.OrderService;
+import com.example.orderservice.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +14,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/")
 public class OrderController {
-    OrderService orderService;
+    private final OrderService orderService;
+    private final PaymentService paymentService;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, PaymentService paymentService) {
         this.orderService = orderService;
+        this.paymentService = paymentService;
     }
 
     @PostMapping("/orders")
@@ -47,8 +50,20 @@ public class OrderController {
     }
 
     @GetMapping("/orders")
-    public ApiResponse<List<OrderProductResponse>> getOrders(@RequestHeader("X-User-Id") Long userId){
+    public ApiResponse<List<OrderProductResponse>> getOrders(@RequestHeader("X-User-Id") Long userId) {
         List<OrderProductResponse> orderList = orderService.getOrdersByUserId(Long.valueOf(userId));
         return ApiResponse.success(orderList);
+    }
+
+    @PostMapping("/orders/{orderId}/enter")
+    public ApiResponse<String> enterPayment(@PathVariable Long orderId) {
+        orderService.enterPayment(orderId);
+        return ApiResponse.success("결제에 진입합니다.");
+    }
+
+    @PostMapping("/orders/{orderId}/pay")
+    public ApiResponse<String> processPayment(@PathVariable Long orderId) {
+        String isSuccess = paymentService.processPayment(orderId);
+        return ApiResponse.success("Payment successful.");
     }
 }
