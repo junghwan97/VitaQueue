@@ -80,5 +80,11 @@ public class ProductController {
     public void saveProductStock(@RequestBody StockRequest stockRequest) {
         productService.saveProductStock(stockRequest);
     }
+
+    @PostMapping("/{productId}/decrease-stock")
+    public ApiResponse<String> decreaseStock(@PathVariable Long productId, @RequestParam int quantity) {
+        productService.decreaseStock(productId, quantity);
+        return ApiResponse.success("재고가 감소되었습니다.");
+    }
 }
 

@@ -118,7 +118,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 주문 상태를 확인
-        if (order.getStatus() != OrderStatus.CREATED) {
+        if (order.getStatus() != OrderStatus.PAYMENT_SUCCESS) {
             throw new VitaQueueException(ErrorCode.ORDER_CANCELLATION_NOT_ALLOWED, "배송 중 이전에만 주문을 취소할 수 있습니다.");
         }
 

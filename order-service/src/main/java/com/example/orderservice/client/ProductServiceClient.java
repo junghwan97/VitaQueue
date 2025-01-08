@@ -19,4 +19,7 @@ public interface ProductServiceClient {
 
     @GetMapping("/products/{productId}")
     ApiResponse<ProductResponse> getProduct(@PathVariable Long productId);
+
+    @PostMapping("/{productId}/decrease-stock")
+    ApiResponse<String> decreaseStock(@PathVariable Long productId, @RequestParam int quantity);
 }
