@@ -42,9 +42,7 @@ public class PaymentServiceImpl implements PaymentService{
         }
 
         // 두 번째 20% 실패 시뮬레이션: 결제 중 실패
-        boolean isPaymentSuccessful = Math.random() >= 0.2;
-
-        if (isPaymentSuccessful) {
+        if (Math.random() >= 0.2) {
             // 결제 성공 처리
             order.updateStatus(OrderStatus.PAYMENT_SUCCESS);
 

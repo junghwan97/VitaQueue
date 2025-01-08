@@ -31,27 +31,33 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderId}/cancel")
-    public ApiResponse<String> cancelOrder(@PathVariable Long orderId, @RequestHeader("X-User-Id") Long userId) {
+    public ApiResponse<String> cancelOrder(@PathVariable Long orderId, @RequestHeader("X-User-Id") String userId) {
         // 주문 취소
-        orderService.cancelOrder(orderId, userId);
+        orderService.cancelOrder(orderId, Long.valueOf(userId));
         return ApiResponse.success("주문이 취소되었습니다.");
     }
 
     @GetMapping("/orders/{orderId}")
-    public ApiResponse<List<OrderProductResponse>> getOrder(@PathVariable Long orderId, @RequestHeader("X-User-Id") Long userId) {
+    public ApiResponse<List<OrderProductResponse>> getOrder(@PathVariable Long orderId, @RequestHeader("X-User-Id") String userId) {
         // 주문 상세 조회
-        return ApiResponse.success(orderService.getOrder(orderId, userId));
+        return ApiResponse.success(orderService.getOrder(orderId, Long.valueOf(userId)));
     }
 
     @PostMapping("/orders/return/{orderId}")
-    public ApiResponse<String> returnOrder(@PathVariable Long orderId, @RequestHeader("X-User-Id") Long userId) {
-        orderService.returnOrder(orderId, userId);
+    public ApiResponse<String> returnOrder(@PathVariable Long orderId, @RequestHeader("X-User-Id") String userId) {
+        orderService.returnOrder(orderId, Long.valueOf(userId));
         return ApiResponse.success("주문이 취소되었습니다.");
     }
 
     @GetMapping("/orders")
-    public ApiResponse<List<OrderProductResponse>> getOrders(@RequestHeader("X-User-Id") Long userId) {
+    public ApiResponse<List<OrderProductResponse>> getOrders(@RequestHeader("X-User-Id") String userId) {
         List<OrderProductResponse> orderList = orderService.getOrdersByUserId(Long.valueOf(userId));
+        return ApiResponse.success(orderList);
+    }
+
+    @GetMapping("/orderByuser")
+    public ApiResponse<List<OrderProductResponse>> getOrderByUser(@RequestParam Long userId) {
+        List<OrderProductResponse> orderList = orderService.getOrdersByUserId(userId);
         return ApiResponse.success(orderList);
     }
 
@@ -64,6 +70,6 @@ public class OrderController {
     @PostMapping("/orders/{orderId}/pay")
     public ApiResponse<String> processPayment(@PathVariable Long orderId) {
         String isSuccess = paymentService.processPayment(orderId);
-        return ApiResponse.success("Payment successful.");
+        return ApiResponse.success("결제가 완료되었습니다.");
     }
 }

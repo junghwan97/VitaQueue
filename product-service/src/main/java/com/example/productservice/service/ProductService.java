@@ -7,6 +7,7 @@ import com.example.productservice.dto.response.ProductResponse;
 import com.example.productservice.jpa.ProductEntity;
 import com.example.productservice.jpa.ProductStockEntity;
 import lombok.SneakyThrows;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public interface ProductService {
     @SneakyThrows
     List<ProductResponse> getProducts(Long cursorId, Integer size);
 
+    @Transactional
     ProductResponse getProduct(Long productId) throws Exception;
 
     void setProduct(ProductRequest request, Long userId, String role);
@@ -27,4 +29,7 @@ public interface ProductService {
     void saveProductStock(StockRequest stockRequest);
 
     ProductEntity getProductEntity(Long productId);
+
+    @Transactional
+    void decreaseStock(Long productId, int quantity);
 }

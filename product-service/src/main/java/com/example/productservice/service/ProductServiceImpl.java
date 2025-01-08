@@ -98,6 +98,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // 상품 재고 등록 확인
+    @Transactional
     public ProductStockEntity getProductStockByProductId(Long productId) {
         ProductStockEntity productStockEntity = getProductStockEntity(productId);
         if (productStockEntity == null)
@@ -118,7 +119,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // 상품 재고 정보 조회
-    private ProductStockEntity getProductStockEntity(Long productId) {
-        return productStockRepository.findByProductId(productId).orElse(null);
+    @Transactional
+    public ProductStockEntity getProductStockEntity(Long productId) {
+//        return productStockRepository.findByProductId(productId).orElse(null);
+        return productStockRepository.findByProductIdWithLock(productId);
     }
+
+    @Override
+    @Transactional
+    public void decreaseStock(Long productId, int quantity) {
+        ProductStockEntity stockEntity = productStockRepository.findByProductIdWithLock(productId);
+
+        if (quantity < 0) {
+            throw new VitaQueueException(ErrorCode.STOCK_DECREASE_NEGATIVE, "재고 감소 수량은 음수일 수 없습니다.");
+        }
+        if (stockEntity.getStock() < quantity) {
+            throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH, "재고가 부족합니다.");
+        }
+
+        stockEntity.setStock(stockEntity.getStock() - quantity);
+        productStockRepository.save(stockEntity);
+    }
+
 }

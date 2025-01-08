@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
         // 회원 정보와 주문 목록 반환
         UserEntity userEntity = getUserEntity(userId);
 
-        List<OrderProductResponse> orders = orderServiceClient.getOrders(userId);
+        List<OrderProductResponse> orders = orderServiceClient.getOrders(userId).getResult();
         List<OrderProductResponse> orderList = (orders != null) ? orders : Collections.emptyList();
 
         return UserInfoResponse.fromEntity(UserEntity.decryptSensitiveData(userEntity), orderList);
