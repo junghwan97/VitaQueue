@@ -1,5 +1,6 @@
 package com.example.orderservice.service;
 
+import com.example.orderservice.client.ProductServiceClient;
 import com.example.orderservice.exception.ErrorCode;
 import com.example.orderservice.exception.VitaQueueException;
 import com.example.orderservice.jpa.*;
@@ -13,14 +14,17 @@ public class PaymentServiceImpl implements PaymentService{
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final StockService stockService;
+//    private final StockService stockService;
+    private final ProductServiceClient productService;
 
     public PaymentServiceImpl(OrderRepository orderRepository,
                               OrderProductRepository orderProductRepository,
-                              StockService stockService) {
+//                              StockService stockService,
+                              ProductServiceClient productService) {
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
-        this.stockService = stockService;
+//        this.stockService = stockService;
+        this.productService = productService;
     }
 
     @Transactional
@@ -51,7 +55,8 @@ public class PaymentServiceImpl implements PaymentService{
 
             // 모든 상품의 재고 차감
             for (OrderProductEntity orderProduct : orderProducts) {
-                stockService.decreaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
+//                stockService.decreaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
+                productService.decreaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
                 orderProduct.updateStatus(OrderStatus.PAYMENT_SUCCESS);
             }
         } else {
