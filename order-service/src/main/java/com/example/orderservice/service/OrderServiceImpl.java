@@ -23,16 +23,16 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
-    private final StockService stockService;
+//    private final StockService stockService;
     private final ProductServiceClient productService;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             OrderProductRepository orderProductRepository,
-                            StockService stockService,
+//                            StockService stockService,
                             ProductServiceClient productService) {
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
-        this.stockService = stockService;
+//        this.stockService = stockService;
         this.productService = productService;
     }
 
@@ -84,10 +84,10 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderProductEntity createOrderProduct(Long userId, OrderEntity savedOrder, OrderRequest orderRequest) {
 //        stockService.decreaseStock(orderRequest.getProductId(), orderRequest.getQuantity());
-        if (stockService.getProduct(orderRequest.getProductId()).getStock() < orderRequest.getQuantity()) {
+        if (productService.getProduct(orderRequest.getProductId()).getResult().getStock() < orderRequest.getQuantity()) {
             throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH);
         }
-        BigDecimal price = stockService.getProduct(orderRequest.getProductId()).getPrice();
+        BigDecimal price = productService.getProduct(orderRequest.getProductId()).getResult().getPrice();
 
         return OrderProductEntity.builder()
                 .order(savedOrder)

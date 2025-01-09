@@ -70,6 +70,7 @@ public class ProductEntity {
         productEntity.setPrice(request.getPrice());
         productEntity.setDescript(request.getDescript());
         productEntity.setCategory(request.getCategory());
+        productEntity.setFlashSale(request.isFlashSale());
 
         return productEntity;
     }
