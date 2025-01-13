@@ -13,6 +13,6 @@ public class WishProductUpdateRequest {
     private Long productId;
 
     @NotNull
-    private int quantity;
+    private Integer quantity;
 
 }

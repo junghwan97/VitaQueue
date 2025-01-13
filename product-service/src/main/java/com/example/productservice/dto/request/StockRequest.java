@@ -13,5 +13,5 @@ public class StockRequest {
     private Long productId;
     @NotNull
     @Min(1)
-    private Long stock;
+    private Integer stock;
 }

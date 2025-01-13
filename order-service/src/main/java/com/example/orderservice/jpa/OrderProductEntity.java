@@ -32,7 +32,7 @@ public class OrderProductEntity {
     private Long productId;
 
     @Column(name = "ordered_product_quantity", nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "ordered_product_price", nullable = false)
     private BigDecimal price;
@@ -61,7 +61,7 @@ public class OrderProductEntity {
     }
 
     @Builder
-    public OrderProductEntity(Long id, Long userId, OrderEntity order, Long productId, int quantity, BigDecimal price, OrderStatus status) {
+    public OrderProductEntity(Long id, Long userId, OrderEntity order, Long productId, Integer quantity, BigDecimal price, OrderStatus status) {
         this.id = id;
         this.userId = userId;
         this.order = order;
