@@ -2,7 +2,7 @@ package com.example.userservice.security;
 
 import com.example.userservice.dto.request.UserLoginRequest;
 import com.example.userservice.jpa.UserEntity;
-import com.example.userservice.service.UserService;
+import com.example.userservice.service.UserJoinService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -25,14 +25,14 @@ import java.util.Date;
 
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private UserService userService;
+    private UserJoinService userJoinService;
     private Environment env;
 
     public AuthenticationFilter(AuthenticationManager authenticationManager,
-                                UserService userService,
+                                UserJoinService userJoinService,
                                 Environment env) {
         super.setAuthenticationManager(authenticationManager);
-        this.userService = userService;
+        this.userJoinService = userJoinService;
         this.env = env;
     }
 
@@ -59,7 +59,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
         String email = (((User)authResult.getPrincipal()).getUsername());
-        UserEntity userDetails = userService.getUserDetailsByEmail(email);
+        UserEntity userDetails = userJoinService.getUserDetailsByEmail(email);
         String token = "Bearer " + Jwts.builder()
                 .setSubject(String.valueOf(userDetails.getId()))
                 .claim("userId", userDetails.getId())
