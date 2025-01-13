@@ -13,7 +13,7 @@ public class OrderProductResponse {
     private Long id;
     private OrderStatus orderStatus;
     private String productName;
-    private int quantity ;
+    private Integer quantity ;
     private BigDecimal price;
 
 

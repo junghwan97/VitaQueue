@@ -1,6 +1,6 @@
 package com.example.userservice.security;
 
-import com.example.userservice.service.UserService;
+import com.example.userservice.service.UserJoinService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -15,11 +15,11 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class WebSecurity {
 
-    private final UserService userService; // 사용자 서비스 (UserDetailsService 역할)
+    private final UserJoinService userService; // 사용자 서비스 (UserDetailsService 역할)
     private final BCryptPasswordEncoder bCryptPasswordEncoder; // 비밀번호 암호화 인코더
     private final Environment env; // 애플리케이션 환경 설정을 읽기 위한 환경 객체
 
-    public WebSecurity(Environment env, UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public WebSecurity(Environment env, UserJoinService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.env = env;
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;

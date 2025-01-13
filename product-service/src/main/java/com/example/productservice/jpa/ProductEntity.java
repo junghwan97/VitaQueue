@@ -44,6 +44,12 @@ public class ProductEntity {
     @Column(name = "is_flash_sale", nullable = false)
     private boolean isFlashSale;
 
+    @Column(name = "is_flash_sale_open", nullable = false)
+    private boolean isFlashSaleOpen;
+
+    @Column(name = "start_at")
+    private Timestamp startAt;
+
     @Column(name = "registered_at")
     private Timestamp registeredAt;
 
@@ -73,5 +79,9 @@ public class ProductEntity {
         productEntity.setFlashSale(request.isFlashSale());
 
         return productEntity;
+    }
+
+    public void updateFlashSaleOpen(boolean eventOpen) {
+        this.isFlashSaleOpen = true;
     }
 }

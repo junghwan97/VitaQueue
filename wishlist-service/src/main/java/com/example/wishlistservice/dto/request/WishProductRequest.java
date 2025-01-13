@@ -9,6 +9,6 @@ public class WishProductRequest {
     private Long productId;
 
     @NotNull
-    private int quantity;
+    private Integer quantity;
 
 }

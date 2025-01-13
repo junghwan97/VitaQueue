@@ -17,7 +17,7 @@ public class ProductResponse {
     private Long sellerId;
     private BigDecimal price;
     private String descript;
-    private Long stock;
+    private Integer stock;
     private boolean isFlashSale;
 
     public static ProductResponse fromEntity(ProductEntity product){
@@ -31,7 +31,7 @@ public class ProductResponse {
         return response;
     }
 
-    public static ProductResponse fromEntity(ProductEntity product, Long stock){
+    public static ProductResponse fromEntity(ProductEntity product, Integer stock){
         return new ProductResponse(
                 product.getId(),
                 product.getName(),

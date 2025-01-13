@@ -12,7 +12,7 @@ public class WishProductResponse {
     private Long wishProductId;
     private Long productId;
     private Long userId;
-    private int quantity;
+    private Integer quantity;
     private BigDecimal price;
 
     public static WishProductResponse fromEntity(WishProduct entity) {

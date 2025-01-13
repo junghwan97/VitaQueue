@@ -27,7 +27,7 @@ public class ProductRequest {
     private String category;
 
     @NotNull(message = "상품의 재고를 입력해 주세요!")
-    private Long stock;
+    private Integer stock;
 
     @NotNull(message = "상품의 선착순 판매 여부를 입력해 주세요!")
     private boolean isFlashSale;

@@ -12,7 +12,7 @@ import java.util.List;
 @FeignClient(name="order-service")
 public interface OrderServiceClient {
 
-    @GetMapping("/orderByuser")
-    ApiResponse<List<OrderProductResponse>> getOrders(@RequestParam Long userId);
+    @GetMapping("/order")
+    ApiResponse<List<OrderProductResponse>> getOrderByUser(@RequestParam Long userId);
 
 }
