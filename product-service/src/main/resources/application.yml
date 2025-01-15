@@ -1,15 +1,28 @@
 server:
   port: 8082
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        step: 5s
+
 spring:
   application:
     name: product-service
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://product-db:13307/${PRODUCT_MYSQL_DATABASE}
-    username: ${PRODUCT_MYSQL_USERNAME}
-    password: ${PRODUCT_MYSQL_PASSWORD}
+    url: jdbc:mysql://localhost:13307/test
+    username: root
+    password: test
 
   jpa:
     hibernate:

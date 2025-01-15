@@ -9,7 +9,7 @@ eureka:
       defaultZone: http://discovery-service:8761/eureka
 
 jwt:
-  secret-key: ${JWT_SECRET_KEY}
+  secret-key: Ck4rMVu+TnJmWUtyM3NhV0g0V2FkZkZQUXVUMVRpV0E=
   expiration-time: 86400000 # 24 hours in milliseconds
 
 management:

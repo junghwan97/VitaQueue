@@ -1,0 +1,7 @@
+##
+GET http://localhost:8000/product-service/test
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUwODEsImF1dGgiOiJST0xFX1VTRVIiLCJzdWIiOiI1MDgxIiwiZXhwIjoxNzM2ODYzNjE2fQ==.JjhpPE5vy_4LwCJcHG-doXdHhlFMT2AZ_BTpNdAM0eY
+
+
+
+
