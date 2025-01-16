@@ -7,7 +7,7 @@ public enum OrderStatus {
 
     CREATED("신규 주문"),
     CANCELLED("주문 취소"),
-    COMPLETED("주문 완료"),
+//    COMPLETED("주문 완료"),
     DELIVERY("배송중"),
     DELIVERED("배송 완료"),
     RETURNED("반품 처리"),
