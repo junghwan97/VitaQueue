@@ -6,23 +6,31 @@ import com.example.productservice.exception.VitaQueueException;
 import com.example.productservice.jpa.ProductRepository;
 import com.example.productservice.jpa.ProductStockEntity;
 import com.example.productservice.jpa.ProductStockRepository;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class StockService {
 
     ProductRepository productRepository;
     ProductStockRepository productStockRepository;
+    RedissonClient redissonClient;
     RedisService redisService;
 
-    public StockService(ProductRepository productRepository, ProductStockRepository productStockRepository, RedisService redisService) {
+    public StockService(ProductRepository productRepository,
+                        ProductStockRepository productStockRepository,
+                        RedisService redisService,
+                        RedissonClient redissonClient) {
         this.productRepository = productRepository;
         this.productStockRepository = productStockRepository;
         this.redisService = redisService;
+        this.redissonClient = redissonClient;
     }
 
     // 상품 재고 확인
@@ -49,53 +57,77 @@ public class StockService {
 
     @Transactional
     public void decreaseStock(Long productId, Integer quantity) {
-        if (quantity < 0) {
-            throw new VitaQueueException(ErrorCode.STOCK_DECREASE_NEGATIVE, "재고 감소 수량은 음수일 수 없습니다.");
+        String lockKey = "product-lock:" + productId;
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            // 락 획득: 10초 대기, 5초 락 유지
+            if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
+                if (quantity < 0) {
+                    throw new VitaQueueException(ErrorCode.STOCK_DECREASE_NEGATIVE, "재고 감소 수량은 음수일 수 없습니다.");
+                }
+
+                String redisKey = "productStock:" + productId;
+                Integer stock = redisService.getValue(redisKey);
+
+                if (stock == null) {
+                    // Redis에 없으면 DB에서 조회
+                    ProductStockEntity stockEntity = productStockRepository.findByProductIdWithLock(productId);
+                    stock = stockEntity.getStock();
+                    redisService.setValues(redisKey, stock);
+                }
+
+                if (stock < quantity) {
+                    throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH, "재고가 부족합니다.");
+                }
+
+                // Redis에서 재고 감소
+                redisService.decrement(redisKey, quantity);
+            } else {
+                throw new VitaQueueException(ErrorCode.LOCK_ACQUISITION_FAILED, "재고 감소 중 락 획득 실패");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("재고 감소 중 오류 발생", e);
+        } finally {
+            lock.unlock(); // 락 해제
         }
-
-        String redisKey = "productStock:" + productId;
-        Integer stock = redisService.getValue(redisKey);
-
-        if (stock == null) {
-            // Redis에 없으면 DB에서 조회
-            ProductStockEntity stockEntity = productStockRepository.findByProductIdWithLock(productId);
-            stock = stockEntity.getStock();
-            redisService.setValues(redisKey, stock);
-        }
-
-        if (stock < quantity) {
-            throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH, "재고가 부족합니다.");
-        }
-
-        // Redis에서 재고 감소
-        redisService.decrement(redisKey, quantity);
-//        stockEntity.setStock(stockEntity.getStock() - quantity);
-//        productStockRepository.save(stockEntity);
     }
 
-    // 재고 증가 (추가 구현)
+    // 재고 증가
     @Transactional
     public void increaseStock(Long productId, Integer quantity) {
-        if (quantity < 0) {
-            throw new VitaQueueException(ErrorCode.STOCK_INCREASE_NEGATIVE, "재고 증가 수량은 음수일 수 없습니다.");
+        String lockKey = "product-lock:" + productId;
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            // 락 획득: 10초 대기, 5초 락 유지
+            if (lock.tryLock(10, 5, TimeUnit.SECONDS)) {
+                if (quantity < 0) {
+                    throw new VitaQueueException(ErrorCode.STOCK_INCREASE_NEGATIVE, "재고 증가 수량은 음수일 수 없습니다.");
+                }
+
+                String redisKey = "productStock:" + productId;
+                Integer stock = redisService.getValue(redisKey);
+
+                if (stock == null) {
+                    // Redis에 없으면 DB에서 조회
+                    ProductStockEntity stockEntity = productStockRepository.findByProductIdWithLock(productId);
+                    stock = stockEntity.getStock();
+                    redisService.setValues(redisKey, stock);
+                }
+
+                // Redis에서 재고 증가
+                redisService.increment(redisKey, quantity);
+            } else {
+                throw new VitaQueueException(ErrorCode.LOCK_ACQUISITION_FAILED, "재고 증가 중 락 획득 실패");
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException("재고 증가 중 오류 발생", e);
+        } finally {
+            lock.unlock(); // 락 해제
         }
-
-        String redisKey = "productStock:" + productId;
-        Integer stock = redisService.getValue(redisKey);
-
-        if (stock == null) {
-            // Redis에 없으면 DB에서 조회
-            ProductStockEntity stockEntity = productStockRepository.findByProductIdWithLock(productId);
-            stock = stockEntity.getStock();
-            redisService.setValues(redisKey, stock);
-        }
-
-        // Redis에서 재고 증가
-        redisService.increment(redisKey, quantity);
     }
 
     // Redis 데이터를 주기적으로 DB에 반영
-    @Scheduled(cron = "0 0 * * * ?") // 매 정각마다 실행
+    @Scheduled(cron = "0 */5 * * * ?")
     @Transactional
     public void syncRedisToDatabase() {
         List<String> keys = redisService.getKeys("productStock:*");
@@ -108,6 +140,6 @@ public class StockService {
             stockEntity.setStock(stock);
         }
 
-        productStockRepository.flush(); // 변경 사항 DB에 반영
+        productStockRepository.flush();
     }
 }
