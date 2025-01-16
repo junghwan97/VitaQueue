@@ -1,4 +1,4 @@
-package com.example.productservice.config;
+package com.example.orderservice.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

@@ -27,7 +27,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public void enterPayment(Long orderId) {
+    public String enterPayment(Long orderId) {
         OrderEntity order = getOrder(orderId);
 
         if (order.getStatus() != OrderStatus.CREATED) {
@@ -38,9 +38,9 @@ public class PaymentService {
         if (Math.random() < 0.2) {
             order.updateStatus(OrderStatus.PAYMENT_FAILED);
             updateAllOrderProductStatus(order, OrderStatus.PAYMENT_FAILED);
-            orderRepository.save(order);
             log.info("결제 시도 단계에서 결제 실패"); // 첫 번째 실패
-            throw new VitaQueueException(ErrorCode.PAYMENT_CANCEL);
+//            throw new VitaQueueException(ErrorCode.PAYMENT_CANCEL);
+            return "결제 시도 단계에서 결제 실패";
         }
 
         // 주문 상품 리스트 조회
@@ -51,8 +51,7 @@ public class PaymentService {
             orderProduct.updateStatus(OrderStatus.PAYMENT_ENTERED);
         }
         order.updateStatus(OrderStatus.PAYMENT_ENTERED);
-
-        orderRepository.save(order);
+        return "결제 진입 성공";
     }
 
     @Transactional
@@ -72,7 +71,8 @@ public class PaymentService {
             updateAllOrderProductStatus(order, OrderStatus.PAYMENT_FAILED);
             orderRepository.save(order);
             log.info("결제중 문제 발생"); // 두 번째 실패
-            throw new VitaQueueException(ErrorCode.PAYMENT_CANCEL);
+//            throw new VitaQueueException(ErrorCode.PAYMENT_CANCEL);
+            return "결제중 문제가 발생하여 결제 실패";
         }
         // 결제 성공 처리
         order.updateStatus(OrderStatus.PAYMENT_SUCCESS);

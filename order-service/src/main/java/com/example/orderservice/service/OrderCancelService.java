@@ -1,8 +1,6 @@
 package com.example.orderservice.service;
 
 import com.example.orderservice.client.ProductServiceClient;
-import com.example.orderservice.dto.request.StockRequest;
-import com.example.orderservice.dto.response.ProductStockResponse;
 import com.example.orderservice.exception.ErrorCode;
 import com.example.orderservice.exception.VitaQueueException;
 import com.example.orderservice.jpa.*;
@@ -19,8 +17,8 @@ public class OrderCancelService {
     private final ProductServiceClient productService;
 
     public OrderCancelService(OrderRepository orderRepository,
-                            OrderProductRepository orderProductRepository,
-                            ProductServiceClient productService) {
+                              OrderProductRepository orderProductRepository,
+                              ProductServiceClient productService) {
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
         this.productService = productService;
@@ -52,12 +50,10 @@ public class OrderCancelService {
             orderProduct.updateStatus(OrderStatus.CANCELLED);
 
             // 상품의 재고를 복구
-            ProductStockResponse productStock = productService.checkCount(orderProduct.getProductId());
-            productStock.increaseStock((long) orderProduct.getQuantity());
-            StockRequest stock = new StockRequest(productStock.getProductId(), productStock.getStock());
-            productService.saveProductStock(stock);
+            productService.increaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
         }
     }
+
     // 주문 조회
     private OrderEntity getOrderInfo(Long orderId) {
         OrderEntity order = orderRepository.findById(orderId).orElse(null);

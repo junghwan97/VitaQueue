@@ -26,10 +26,11 @@ public class ProductReadService {
 
     @Autowired
     public ProductReadService(ProductRepository productRepository,
-                              ProductStockRepository productStockRepository
-    ) {
+                              ProductStockRepository productStockRepository,
+                              RedisService redisService) {
         this.productRepository = productRepository;
         this.productStockRepository = productStockRepository;
+        this.redisService = redisService;
     }
 
     public List<ProductResponse> getProducts(Long cursorId, Integer size, Boolean event) {
@@ -55,8 +56,15 @@ public class ProductReadService {
     public ProductResponse getProduct(Long productId) {
         // 상품 아이디로 상품 조회 / 존재하지 않으면 예외처리
         ProductEntity productEntity = getProductEntity(productId);
-        ProductStockEntity stockEntity = getProductStockByProductId(productId);
-        return ProductResponse.fromEntity(productEntity, stockEntity.getStock());
+//        ProductStockEntity stockEntity = getProductStockByProductId(productId);
+        Integer stock = redisService.getValue("productStock:" + productId);
+        if (stock == null) {
+            ProductStockEntity stockEntity = productStockRepository.findByProductId(productId)
+                    .orElseThrow(() -> new VitaQueueException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
+            redisService.setValues("productStock:" + productId, stockEntity.getStock());
+            stock = stockEntity.getStock();
+        }
+        return ProductResponse.fromEntity(productEntity, stock);
     }
 
     //상품 확인

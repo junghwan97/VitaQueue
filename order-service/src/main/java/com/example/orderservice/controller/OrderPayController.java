@@ -19,8 +19,8 @@ public class OrderPayController {
 
     @PostMapping("/orders/{orderId}/enter")
     public ApiResponse<String> enterPayment(@PathVariable Long orderId) {
-        paymentService.enterPayment(orderId);
-        return ApiResponse.success("결제 진입 성공");
+        String result = paymentService.enterPayment(orderId);
+        return ApiResponse.success(result);
     }
 
     @PostMapping("/orders/{orderId}/pay")

@@ -19,7 +19,7 @@ public class OrderReturnController {
     @PostMapping("/orders/return/{orderId}")
     public ApiResponse<String> returnOrder(@PathVariable Long orderId, @RequestHeader("X-User-Id") String userId) {
         orderReturnService.returnOrder(orderId, Long.valueOf(userId));
-        return ApiResponse.success("주문이 취소되었습니다.");
+        return ApiResponse.success("상품이 반품 처리되었습니다.");
     }
 
 }
