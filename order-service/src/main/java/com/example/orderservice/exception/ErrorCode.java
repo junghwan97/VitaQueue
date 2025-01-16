@@ -23,7 +23,9 @@ public enum ErrorCode {
     STOCK_DECREASE_NEGATIVE(HttpStatus.BAD_REQUEST, "재고 감소 수량은 음수일 수 없습니다."), // 재고 감소 값이 음수일 때
     STOCK_NOT_ENOUGH(HttpStatus.CONFLICT, "재고가 부족합니다."),  // 재고가 요청 수량보다 적을 때
     INVALID_ORDER_FOR_PAYMENT(HttpStatus.BAD_REQUEST, "결제 진입을 위한 주문이 생성되지 않았습니다"),
-    PAYMENT_CANCEL(HttpStatus.OK, "사용자에 의해 결제가 취소되었습니다.")
+    PAYMENT_CANCEL(HttpStatus.OK, "사용자에 의해 결제가 취소되었습니다."),
+    LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT, "잠금 획득에 실패하였습니다."),
+    LOCK_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "잠금 요청을 처리하는 동안 예상치 못한 오류가 발생했습니다."),
     ;
 
 
