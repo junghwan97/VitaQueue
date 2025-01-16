@@ -19,9 +19,6 @@ public class StockController {
 
     @GetMapping("/checkCount")
     public Integer checkCount(@RequestParam Long productId) {
-//        ProductStockEntity productStockEntity = stockService.getProductStockByProductId(productId);
-//        ProductStockResponse productStockResponse = new ProductStockResponse();
-//        return productStockResponse.builder().id(productStockEntity.getId()).productId(productStockEntity.getProductId()).stock(productStockEntity.getStock()).build();
         return stockService.getProductStockByProductId(productId);
     }
 
@@ -33,6 +30,12 @@ public class StockController {
     @PostMapping("/{productId}/decrease-stock")
     public ApiResponse<String> decreaseStock(@PathVariable Long productId, @RequestParam Integer quantity) {
         stockService.decreaseStock(productId, quantity);
+        return ApiResponse.success("재고가 감소되었습니다.");
+    }
+
+    @PostMapping("/{productId}/increase-stock")
+    public ApiResponse<String> increaseStock(@PathVariable Long productId, @RequestParam Integer quantity) {
+        stockService.increaseStock(productId, quantity);
         return ApiResponse.success("재고가 감소되었습니다.");
     }
 }
