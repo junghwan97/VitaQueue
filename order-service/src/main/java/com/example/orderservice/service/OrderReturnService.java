@@ -1,8 +1,6 @@
 package com.example.orderservice.service;
 
 import com.example.orderservice.client.ProductServiceClient;
-import com.example.orderservice.dto.request.StockRequest;
-import com.example.orderservice.dto.response.ProductStockResponse;
 import com.example.orderservice.exception.ErrorCode;
 import com.example.orderservice.exception.VitaQueueException;
 import com.example.orderservice.jpa.*;
@@ -21,8 +19,8 @@ public class OrderReturnService {
     private final ProductServiceClient productService;
 
     public OrderReturnService(OrderRepository orderRepository,
-                            OrderProductRepository orderProductRepository,
-                            ProductServiceClient productService) {
+                              OrderProductRepository orderProductRepository,
+                              ProductServiceClient productService) {
         this.orderRepository = orderRepository;
         this.orderProductRepository = orderProductRepository;
         this.productService = productService;
@@ -52,19 +50,13 @@ public class OrderReturnService {
         order.updateStatus(OrderStatus.RETURN_REQUESTED);
         orderRepository.save(order);
 
-        // 연결된 주문 상품들에 대한 상태와 재고를 처리
+        // 해당 주문과 연결된 상품들을 처리
         List<OrderProductEntity> orderProducts = orderProductRepository.findByOrder(order);
         for (OrderProductEntity orderProduct : orderProducts) {
-            ProductStockResponse productStock = productService.checkCount(orderProduct.getProductId());
-
-            // 상품의 재고를 복구
-            productStock.increaseStock((long) orderProduct.getQuantity());
-            StockRequest stock = new StockRequest(productStock.getProductId(), productStock.getStock());
-            productService.saveProductStock(stock);
-
             // 상품 상태를 반품 완료로 변경
             orderProduct.updateStatus(OrderStatus.RETURNED);
-            orderProductRepository.save(orderProduct);
+            // 상품의 재고를 복구
+            productService.increaseStock(orderProduct.getProductId(), orderProduct.getQuantity());
         }
     }
 
