@@ -22,3 +22,15 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://discovery-service:8761/eureka
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        step: 5s

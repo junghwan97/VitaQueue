@@ -9,6 +9,10 @@ spring:
     url: jdbc:mysql://order-db:13308/${ORDER_MYSQL_DATABASE}
     username: ${ORDER_MYSQL_USERNAME}
     password: ${ORDER_MYSQL_PASSWORD}
+  data:
+    redis:
+      host: my-cache-server
+      port: 6379
   jpa:
     hibernate:
       ddl-auto: update
@@ -21,3 +25,15 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://discovery-service:8761/eureka
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        step: 5s
