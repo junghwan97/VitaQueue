@@ -10,6 +10,10 @@ spring:
     url: jdbc:mysql://product-db:13307/${PRODUCT_MYSQL_DATABASE}
     username: ${PRODUCT_MYSQL_USERNAME}
     password: ${PRODUCT_MYSQL_PASSWORD}
+  data:
+    redis:
+      host: my-cache-server
+      port: 6379
 
   jpa:
     hibernate:
@@ -23,3 +27,15 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://discovery-service:8761/eureka
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        step: 5s

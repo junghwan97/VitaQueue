@@ -42,3 +42,16 @@ eureka:
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   expiration-time: 86400000 # 24 hours in milliseconds
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        step: 5s

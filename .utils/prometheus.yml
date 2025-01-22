@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 1s  # 메트릭 수집 간격 (기본값)
+scrape_configs:
+  - job_name: 'user-service'  # User Service 작업 이름
+    metrics_path: '/actuator/prometheus'  # Actuator의 Prometheus 엔드포인트
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8081'  # User Service URL
+
+  - job_name: 'product-service'  # 작업 이름
+    metrics_path: '/actuator/prometheus'  # Actuator의 Prometheus 엔드포인트
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8082'  # Spring Boot 애플리케이션의 URL
+
+  - job_name: 'order-service'  # Order Service 작업 이름
+    metrics_path: '/actuator/prometheus'  # Actuator의 Prometheus 엔드포인트
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8083'  # Order Service URL
+
+  - job_name: 'wishlist-service'  # Order Service 작업 이름
+    metrics_path: '/actuator/prometheus'  # Actuator의 Prometheus 엔드포인트
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8084'  # Order Service URL
+

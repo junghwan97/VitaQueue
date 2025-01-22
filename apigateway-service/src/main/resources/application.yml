@@ -7,9 +7,11 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://discovery-service:8761/eureka
+#      defaultZone: http://127.0.0.1:8761/eureka
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+#  secret-key: Ck4rMVu+TnJmWUtyM3NhV0g0V2FkZkZQUXVUMVRpV0E=
   expiration-time: 86400000 # 24 hours in milliseconds
 
 management:
@@ -73,7 +75,15 @@ spring:
           uri: lb://PRODUCT-SERVICE
           predicates:
             - Path=/product-service/**
-            - Method=GET, POST, PATCH, DELETE
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/product-service/(?<segment>.*), /$\{segment}
+        - id: product-service
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/product-service/**
+            - Method=POST, PATCH, DELETE
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/product-service/(?<segment>.*), /$\{segment}
