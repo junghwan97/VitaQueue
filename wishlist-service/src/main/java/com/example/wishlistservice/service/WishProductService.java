@@ -27,7 +27,7 @@ public class WishProductService {
     private final WishProductRepository wishProductRepository;
 
     public void postWishProduct(WishProductRequest request, Long userId) {
-        ProductResponse product = productServiceClient.getProduct(request.getProductId());
+        ProductResponse product = productServiceClient.getProduct(request.getProductId()).getResult();
         // 장바구니에서 해당 상품이 이미 있는지 확인
         Optional<WishProduct> existingWishProduct = wishProductRepository.findByUserIdAndProductId(userId, request.getProductId());
 
