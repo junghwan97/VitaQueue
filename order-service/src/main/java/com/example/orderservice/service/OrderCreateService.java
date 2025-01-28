@@ -5,14 +5,12 @@ import com.example.orderservice.dto.request.OrderRequest;
 import com.example.orderservice.exception.ErrorCode;
 import com.example.orderservice.exception.VitaQueueException;
 import com.example.orderservice.jpa.*;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Service
 
@@ -81,36 +79,23 @@ public class OrderCreateService {
     }
 
     private OrderProductEntity createOrderProduct(Long userId, OrderEntity savedOrder, OrderRequest orderRequest) {
-        String lockKey = "product-lock:" + orderRequest.getProductId();
-        RLock lock = redissonClient.getLock(lockKey);
-
-        try {
-            if (lock.tryLock(10, 2, TimeUnit.SECONDS)) {
-                // 상품 재고 확인
-                Long availableStock = productService.checkCount(orderRequest.getProductId());
-
-                // 주문 시 현재 상품의 재고 확인
-                if (availableStock < orderRequest.getQuantity()) {
-                    throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH);
-                }
-                BigDecimal price = productService.getProduct(orderRequest.getProductId()).getResult().getPrice();
-
-                return OrderProductEntity.builder()
-                        .order(savedOrder)
-                        .userId(userId)
-                        .productId(orderRequest.getProductId())
-                        .quantity(orderRequest.getQuantity())
-                        .price(price.multiply(BigDecimal.valueOf(orderRequest.getQuantity())))
-                        .status(OrderStatus.CREATED)
-                        .build();
-            } else {
-                throw new VitaQueueException(ErrorCode.LOCK_ACQUISITION_FAILED);
-            }
-        } catch (InterruptedException e) {
-            throw new VitaQueueException(ErrorCode.LOCK_ERROR, e.toString());
-        } finally {
-            lock.unlock();
+        // Step 1: 재고 예약 요청
+        boolean reserved = productService.reserveStock(orderRequest.getProductId(), orderRequest.getQuantity()).getResult();
+        if (!reserved) {
+            throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH, "재고가 부족합니다.");
         }
+
+        // Step 2: 상품 가격 조회
+        BigDecimal price = productService.getProduct(orderRequest.getProductId()).getResult().getPrice();
+
+        return OrderProductEntity.builder()
+                .order(savedOrder)
+                .userId(userId)
+                .productId(orderRequest.getProductId())
+                .quantity(orderRequest.getQuantity())
+                .price(price.multiply(BigDecimal.valueOf(orderRequest.getQuantity())))
+                .status(OrderStatus.RESERVED)
+                .build();
     }
 
     private void updateTotalPrice(OrderEntity order, List<OrderProductEntity> orderProducts) {

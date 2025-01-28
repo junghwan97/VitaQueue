@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RedisService {
@@ -38,5 +39,13 @@ public class RedisService {
     public List<String> getKeys(String pattern) {
         Set<String> keys = redisTemplate.keys(pattern);
         return keys != null ? List.copyOf(keys) : List.of();
+    }
+
+    public void setExpire(String key, long timeout, TimeUnit timeUnit) {
+        redisTemplate.expire(key, timeout, timeUnit);
+    }
+
+    public void delete(String reservedKey) {
+        redisTemplate.delete(reservedKey);
     }
 }
