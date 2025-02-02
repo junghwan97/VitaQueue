@@ -2,6 +2,7 @@ package com.example.orderservice.service;
 
 import com.example.orderservice.client.ProductServiceClient;
 import com.example.orderservice.dto.request.OrderRequest;
+import com.example.orderservice.dto.response.ProductResponse;
 import com.example.orderservice.exception.ErrorCode;
 import com.example.orderservice.exception.VitaQueueException;
 import com.example.orderservice.jpa.*;
@@ -41,12 +42,9 @@ public class OrderCreateService {
         String phone = extractPhone(orderSaveRequestList);
 
         OrderEntity savedOrder = createOrder(userId, address, phone);
-
         List<OrderProductEntity> orderProductList = createOrderProducts(userId, orderSaveRequestList, savedOrder);
         orderProductRepository.saveAll(orderProductList);
-
         updateTotalPrice(savedOrder, orderProductList);
-
         return savedOrder.getId();
     }
 
@@ -79,14 +77,17 @@ public class OrderCreateService {
     }
 
     private OrderProductEntity createOrderProduct(Long userId, OrderEntity savedOrder, OrderRequest orderRequest) {
-        // Step 1: 재고 예약 요청
-        boolean reserved = productService.reserveStock(orderRequest.getProductId(), orderRequest.getQuantity()).getResult();
-        if (!reserved) {
+
+        ProductResponse product = productService.getProduct(orderRequest.getProductId()).getResult();
+        Integer stock = product.getStock();
+
+        if (orderRequest.getQuantity() > stock) {
             throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH, "재고가 부족합니다.");
         }
+        System.out.println("---------------------------------------");
+        productService.decreaseStock(orderRequest.getProductId(), orderRequest.getQuantity()).getResult();
 
-        // Step 2: 상품 가격 조회
-        BigDecimal price = productService.getProduct(orderRequest.getProductId()).getResult().getPrice();
+        BigDecimal price = product.getPrice();
 
         return OrderProductEntity.builder()
                 .order(savedOrder)
@@ -94,8 +95,9 @@ public class OrderCreateService {
                 .productId(orderRequest.getProductId())
                 .quantity(orderRequest.getQuantity())
                 .price(price.multiply(BigDecimal.valueOf(orderRequest.getQuantity())))
-                .status(OrderStatus.RESERVED)
+                .status(OrderStatus.CREATED)
                 .build();
+
     }
 
     private void updateTotalPrice(OrderEntity order, List<OrderProductEntity> orderProducts) {

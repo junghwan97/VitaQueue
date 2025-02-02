@@ -26,6 +26,7 @@ public enum ErrorCode {
     PAYMENT_CANCEL(HttpStatus.OK, "사용자에 의해 결제가 취소되었습니다."),
     LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT, "잠금 획득에 실패하였습니다."),
     LOCK_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "잠금 요청을 처리하는 동안 예상치 못한 오류가 발생했습니다."),
+    ORDER_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "주문 생성중 문제가 발생했습니다.")
     ;
 
 

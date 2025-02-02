@@ -64,4 +64,21 @@ public class RedisConfig {
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
     }
+
+
+    // RedisExpirationListener 등록
+//    @Bean
+//    public RedisMessageListenerContainer redisMessageListenerContainer(
+//            RedisConnectionFactory connectionFactory,
+//            MessageListenerAdapter listenerAdapter) {
+//        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+//        container.setConnectionFactory(connectionFactory);
+//        container.addMessageListener(listenerAdapter, new PatternTopic("__keyevent@*__:expired"));
+//        return container;
+//    }
+//
+//    @Bean
+//    public MessageListenerAdapter listenerAdapter(RedisExpirationListener listener) {
+//        return new MessageListenerAdapter(listener, "handleMessage");
+//    }
 }
