@@ -11,21 +11,26 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RedisService {
 
-    private final RedisTemplate<String, Integer> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    public RedisService(RedisTemplate<String, Integer> redisTemplate) {
+    public RedisService(RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
-    public void setValues(String key, Integer value) {
-        ValueOperations<String, Integer> values = redisTemplate.opsForValue();
+    public void setValues(String key, String value) {
+        ValueOperations<String, String> values = redisTemplate.opsForValue();
         values.set(key, value);
     }
 
     public Integer getValue(String key) {
-        ValueOperations<String, Integer> values = redisTemplate.opsForValue();
-        if (values.get(key) == null) return null;
-        return values.get(key);
+        ValueOperations<String, String> values = redisTemplate.opsForValue();
+        String value = values.get(key);
+        if (value == null) return null;
+        try {
+            return Integer.parseInt(value); // String → Integer 변환
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Redis value error", e);
+        }
     }
 
     public void decrement(String key, Integer value) {

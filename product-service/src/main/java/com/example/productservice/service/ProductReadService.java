@@ -57,11 +57,12 @@ public class ProductReadService {
         // 상품 아이디로 상품 조회 / 존재하지 않으면 예외처리
         ProductEntity productEntity = getProductEntity(productId);
 //        ProductStockEntity stockEntity = getProductStockByProductId(productId);
-        Integer stock = redisService.getValue("productStock:" + productId);
+        Integer stock = redisService.getValue("product-Stock:" + productId);
+        System.out.println("++++++++++++++++++++++++++++"+ stock);
         if (stock == null) {
             ProductStockEntity stockEntity = productStockRepository.findByProductId(productId)
                     .orElseThrow(() -> new VitaQueueException(ErrorCode.PRODUCT_STOCK_NOT_FOUND));
-            redisService.setValues("productStock:" + productId, stockEntity.getStock());
+            redisService.setValues("product-Stock:" + productId, String.valueOf(stockEntity.getStock()));
             stock = stockEntity.getStock();
         }
         return ProductResponse.fromEntity(productEntity, stock);

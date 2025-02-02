@@ -14,8 +14,8 @@ public interface ProductServiceClient {
     @GetMapping("/checkCount")
     Long checkCount(@RequestParam Long productId);
 
-    @PostMapping("/reserve")
-    ApiResponse<Boolean> reserveStock(@RequestParam Long productId, @RequestParam Integer quantity);
+//    @PostMapping("/reserve")
+//    ApiResponse<Boolean> reserveStock(@RequestParam Long productId, @RequestParam Integer quantity);
 
     @GetMapping("/products/{productId}")
     ApiResponse<ProductResponse> getProduct(@PathVariable Long productId);
@@ -25,4 +25,7 @@ public interface ProductServiceClient {
 
     @PostMapping("/{productId}/increase-stock")
     ApiResponse<String> increaseStock(@PathVariable Long productId, @RequestParam Integer quantity);
+
+    @PostMapping("/{productId}/restore-reserved")
+    ApiResponse<String> restoreReservedStock(@PathVariable Long productId, @RequestParam Integer quantity);
 }
