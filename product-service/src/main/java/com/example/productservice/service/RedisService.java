@@ -2,6 +2,7 @@ package com.example.productservice.service;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,5 +53,13 @@ public class RedisService {
 
     public void delete(String reservedKey) {
         redisTemplate.delete(reservedKey);
+    }
+
+    public Long executeLuaScript(String luaScript, List<String> keys, List<String> args) {
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptText(luaScript);
+        redisScript.setResultType(Long.class);
+
+        return redisTemplate.execute(redisScript, keys, args.toArray());
     }
 }

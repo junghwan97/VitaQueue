@@ -84,7 +84,6 @@ public class OrderCreateService {
         if (orderRequest.getQuantity() > stock) {
             throw new VitaQueueException(ErrorCode.STOCK_NOT_ENOUGH, "재고가 부족합니다.");
         }
-        System.out.println("---------------------------------------");
         productService.decreaseStock(orderRequest.getProductId(), orderRequest.getQuantity()).getResult();
 
         BigDecimal price = product.getPrice();
