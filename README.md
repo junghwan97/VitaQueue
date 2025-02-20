@@ -105,7 +105,7 @@ docker-compose up --build
 <summary>🏗 Sequence Diagram</summary>
 <div markdown="1">
 
-![Sequence Diagram](https://github.com/user-attachments/assets/32a8be83-2b84-45c8-af69-f2ac9c0d4b2c)
+![Sequence Diagram](https://github.com/user-attachments/assets/042b3277-51ec-4748-b260-83cfc496ba73)
 
 </div>
 </details>
